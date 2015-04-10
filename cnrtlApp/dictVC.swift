@@ -47,17 +47,16 @@ class dictVC: UIViewController, UIWebViewDelegate {
                     // If there is an error in the web request, print it to the console
                     println(error.localizedDescription)
                 }
-                var err: NSError?
                 let html = NSURLRequest(URL: url!)
-                println(html)
-                dispatch_async(dispatch_get_main_queue(), {
-                    self.appsWebView!.loadRequest(html)
-                    self.appsWebView!.reload()
-                })
+                self.appsWebView!.loadRequest(html)
             })
             
             task.resume()
         }
+    }
+    
+    override func viewDidAppear(animated: Bool) {
+        self.appsWebView!.reload()
     }
     
     @IBAction func searchBtn_click(sender: AnyObject) {
