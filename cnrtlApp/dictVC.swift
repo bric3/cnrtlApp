@@ -25,11 +25,12 @@ class dictVC: UIViewController, UIWebViewDelegate, UITextViewDelegate {
         let theWidth = view.frame.size.width
         let theHeight = view.frame.size.height
         
-        appsWebView.frame = CGRectMake(0, 0, theWidth, theHeight-35)
+        appsWebView.frame = CGRectMake(0, 7, theWidth, theHeight-35)
         frameSearchView.frame = CGRectMake(0, appsWebView.frame.maxY, theWidth, 50)
-        searchTextView.frame = CGRectMake(2, 1, self.frameSearchView.frame.size.width-80, 30)
+        searchTextView.frame = CGRectMake(2, 1, self.frameSearchView.frame.size.width-80, 22)
         searchTextView.backgroundColor = UIColor.lightGrayColor()
-        searchBtn.center = CGPointMake(frameSearchView.frame.size.width - 40, 15)
+        searchTextView.layer.cornerRadius = 10
+        searchBtn.center = CGPointMake(frameSearchView.frame.size.width - 40, 12)
         
         appsWebViewOriginalY = self.appsWebView.frame.origin.y
         frameSearchViewOriginalY = self.frameSearchView.frame.origin.y
