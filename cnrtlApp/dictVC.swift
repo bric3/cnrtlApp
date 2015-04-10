@@ -6,6 +6,8 @@
 //  Copyright (c) 2015 Black_Shark. All rights reserved.
 //
 
+// TODO make keyboard appearance push everything up
+
 import UIKit
 
 class dictVC: UIViewController, UIWebViewDelegate {
@@ -32,13 +34,17 @@ class dictVC: UIViewController, UIWebViewDelegate {
     }
     
     func searchCNRTL(searchTerm: String) {
-        // TODO does not look up new words after looking up first word. 
-        // TODO get rid of all extra html
         println("searching for \(searchTerm)")
         // Now escape anything else that isn't URL-friendly
         if let cnrtlSearchTerm = searchTerm.stringByAddingPercentEscapesUsingEncoding(NSUTF8StringEncoding) {
             let urlPath = "http://cnrtl.fr/definition/\(cnrtlSearchTerm)"
             let url = NSURL(string: urlPath)
+            var error: NSError?
+            // get only html relevant to definition of word
+            let html = parseHTML(NSString(contentsOfURL: url!, encoding: NSUTF8StringEncoding, error: &error)!)
+            if let error = error {
+                println("Error : \(error)")
+            }
             let session = NSURLSession.sharedSession()
             let task = session.dataTaskWithURL(url!, completionHandler: {data, response, error -> Void in
                 println("Task completed")
@@ -47,12 +53,32 @@ class dictVC: UIViewController, UIWebViewDelegate {
                     // If there is an error in the web request, print it to the console
                     println(error.localizedDescription)
                 }
-                let html = NSURLRequest(URL: url!)
-                self.appsWebView!.loadRequest(html)
+                self.appsWebView!.loadHTMLString(html, baseURL: url!)
             })
             
             task.resume()
         }
+    }
+    
+    func parseHTML(html: NSString) -> NSString {
+        var err : NSError?
+        var parser = HTMLParser(html: html, error: &err)
+        if err != nil {
+            println(err)
+            exit(1)
+        }
+        
+        var bodyNode = parser.body
+        
+        if let inputNodes = bodyNode?.findChildTags("div") {
+            for node in inputNodes {
+                if node.getAttributeNamed("id") == "contentbox" {
+                    return node.rawContents
+                }
+            }
+        }
+        println("failed to find contentbox")
+        return html
     }
     
     override func viewDidAppear(animated: Bool) {
