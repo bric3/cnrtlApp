@@ -6,15 +6,18 @@
 //  Copyright (c) 2015 Black_Shark. All rights reserved.
 //
 
-// TODO make keyboard appearance push everything up
-
 import UIKit
 
-class dictVC: UIViewController, UIWebViewDelegate {
+class dictVC: UIViewController, UIWebViewDelegate, UITextViewDelegate {
+    
     @IBOutlet weak var appsWebView: UIWebView!
     @IBOutlet weak var searchBtn: UIButton!
     @IBOutlet weak var searchTextView: UITextView!
     @IBOutlet weak var frameSearchView: UIView!
+
+    var frameSearchViewOriginalY:CGFloat = 0
+    var appsWebViewOriginalY:CGFloat = 0
+
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -22,12 +25,53 @@ class dictVC: UIViewController, UIWebViewDelegate {
         let theWidth = view.frame.size.width
         let theHeight = view.frame.size.height
         
-        appsWebView.frame = CGRectMake(0, 0, theWidth, theHeight*8/10)
-        frameSearchView.frame = CGRectMake(0, theHeight*8/10, theWidth, theHeight*2/10)
-        searchTextView.frame = CGRectMake(0, 0, theWidth-52, theHeight*2/10)
-        searchBtn.center = CGPointMake(self.frameSearchView.frame.size.width - 50, 24)
+        appsWebView.frame = CGRectMake(0, 0, theWidth, theHeight-35)
+        frameSearchView.frame = CGRectMake(0, appsWebView.frame.maxY, theWidth, 50)
+        searchTextView.frame = CGRectMake(2, 1, self.frameSearchView.frame.size.width-80, 30)
+        searchTextView.backgroundColor = UIColor.lightGrayColor()
+        searchBtn.center = CGPointMake(frameSearchView.frame.size.width - 40, 15)
+        
+        appsWebViewOriginalY = self.appsWebView.frame.origin.y
+        frameSearchViewOriginalY = self.frameSearchView.frame.origin.y
+        
+        NSNotificationCenter.defaultCenter().addObserver(self, selector: "keyboardWasShown:", name: UIKeyboardDidShowNotification, object: nil)
+        NSNotificationCenter.defaultCenter().addObserver(self, selector: "keyboardWillHide:", name: UIKeyboardWillHideNotification, object: nil)
+        
+        let tapScrollViewGesture = UITapGestureRecognizer(target: self, action: "didTapScrollView")
+        tapScrollViewGesture.numberOfTapsRequired = 1
+        appsWebView.addGestureRecognizer(tapScrollViewGesture)
     }
-
+    
+    func didTapWebView() {
+        self.view.endEditing(true)
+    }
+    
+    func keyboardWasShown(notification:NSNotification) {
+        let dict:NSDictionary = notification.userInfo!
+        let s:NSValue = dict.valueForKey(UIKeyboardFrameEndUserInfoKey) as NSValue
+        let rect:CGRect = s.CGRectValue()
+        
+        UIView.animateWithDuration(0.3, delay: 0, options: .CurveLinear, animations: {
+            self.appsWebView.frame.origin.y = self.appsWebViewOriginalY - rect.height
+            self.frameSearchView.frame.origin.y = self.frameSearchViewOriginalY - rect.height
+            }, completion: {
+                (finished:Bool) in
+        })
+    }
+    
+    func keyboardWillHide(notification:NSNotification) {
+        let dict:NSDictionary = notification.userInfo!
+        let s:NSValue = dict.valueForKey(UIKeyboardFrameEndUserInfoKey) as NSValue
+        let rect:CGRect = s.CGRectValue()
+        
+        UIView.animateWithDuration(0.3, delay: 0, options: .CurveLinear, animations: {
+            self.appsWebView.frame.origin.y = self.appsWebViewOriginalY
+            self.frameSearchView.frame.origin.y = self.frameSearchViewOriginalY
+            }, completion: {
+                (finished:Bool) in
+        })
+    }
+    
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
         // Dispose of any resources that can be recreated.
@@ -89,6 +133,7 @@ class dictVC: UIViewController, UIWebViewDelegate {
         if searchTextView.text != "" {
             searchCNRTL(searchTextView.text)
             searchTextView.text = ""
+            self.view.endEditing(true)
         }
     }
 
