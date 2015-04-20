@@ -4,4 +4,4 @@ Simple app for me to get started with iOS programming.
 
 Provides a basic search and webview for looking up words in the best online french dictionary (cnrtl.fr). 
 
-(cnrtl database used without their permission, but I am very thankful for their service)
+(All lookups made through the cnrtl database, many thanks for their free service)
